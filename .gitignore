@@ -1,0 +1,6 @@
+# Ignorar arquivos de cache do Python
+__pycache__/
+*.pyc
+
+# Ignorar o arquivo do banco de dados
+pbl4.db
