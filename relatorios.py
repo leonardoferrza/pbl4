@@ -1,4 +1,4 @@
-# Arquivo: PBL4/relatorios.py (VERSÃO FINAL REFATORADA)
+# Arquivo: PBL4/relatorios.py (VERSÃO FINAL COMPLETA)
 
 from database import conectar
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
@@ -12,11 +12,12 @@ def gerar_relatorios():
     while True:
         print(aviso_cancelar()) # Mostra "Insira '.' para cancelar"
         
-        # MUDANÇA AQUI: Ajustámos o nome da opção 3
+        # MUDANÇA AQUI: Adicionamos a nova opção (5)
         print("\n(1) Contagem de materiais por Tipo")
         print("(2) Contagem de materiais por Nível")
         print("(3) Contagem de materiais por Tema")
         print("(4) Contagem de materiais por Mês/Ano")
+        print("(5) Média de materiais registrados por Mês")
         print("(0) Voltar ao menu principal")
         
         try:
@@ -26,7 +27,7 @@ def gerar_relatorios():
                 print("\nRetornando ao menu principal...")
                 break # Sai do loop 'while True'
 
-            # --- Opção (1): Contagem por Tipo (Sem mudança) ---
+            # --- Opção (1): Contagem por Tipo ---
             elif acao == 1:
                 print("\n--- Relatório: Contagem por Tipo ---")
                 try:
@@ -47,7 +48,7 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
             
-            # --- Opção (2): Contagem por Nível (Sem mudança) ---
+            # --- Opção (2): Contagem por Nível ---
             elif acao == 2:
                 print("\n--- Relatório: Contagem por Nível ---")
                 try:
@@ -68,14 +69,13 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
 
-            # --- OPÇÃO (3): Contagem por Tema (REFATORADA) ---
+            # --- Opção (3): Contagem por Tema ---
             elif acao == 3:
                 print("\n--- Relatório: Contagem por Tema ---")
                 try:
                     conexao = conectar()
                     cursor = conexao.cursor()
                     
-                    # MUDANÇA AQUI: Usamos JOIN para buscar o nome do tema
                     sql = """
                     SELECT 
                         t.nome, 
@@ -88,9 +88,7 @@ def gerar_relatorios():
                     cursor.execute(sql)
                     resultados = cursor.fetchall()
                     
-                    # Novos cabeçalhos
                     cabecalhos = ["Tema", "Quantidade Registrada"]
-                    
                     print("\n" + tabela_formatada(cabecalhos, resultados))
 
                 except Exception as e:
@@ -99,7 +97,7 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
             
-            # --- Opção (4): Contagem por Mês/Ano (Sem mudança) ---
+            # --- Opção (4): Contagem por Mês/Ano ---
             elif acao == 4:
                 print("\n--- Relatório: Contagem por Mês/Ano ---")
                 try:
@@ -121,6 +119,38 @@ def gerar_relatorios():
                     cabecalhos = ["Mês/Ano", "Quantidade Registrada"]
                     
                     print("\n" + tabela_formatada(cabecalhos, resultados))
+
+                except Exception as e:
+                    print(f"\n{erro()} Erro ao gerar relatório: {e}")
+                finally:
+                    if 'conexao' in locals():
+                        conexao.close()
+
+            # --- NOVA OPÇÃO (5): Média por Mês/Ano ---
+            elif acao == 5:
+                print("\n--- Relatório: Média de Materiais por Mês ---")
+                try:
+                    conexao = conectar()
+                    cursor = conexao.cursor()
+                    
+                    # SQL com Sub-consulta
+                    sql = """
+                    SELECT AVG(Contagem) 
+                    FROM (
+                        SELECT COUNT(*) as Contagem
+                        FROM materiais
+                        GROUP BY SUBSTR(data, 4, 7)
+                    )
+                    """
+                    
+                    cursor.execute(sql)
+                    # Pega apenas o primeiro (e único) resultado
+                    media = cursor.fetchone()[0]
+                    
+                    if media is None:
+                        print("\nNenhum material registrado para calcular a média.")
+                    else:
+                        print(f"\nA média de materiais registrados por mês é: {media:.2f}")
 
                 except Exception as e:
                     print(f"\n{erro()} Erro ao gerar relatório: {e}")
