@@ -1,11 +1,19 @@
+# Arquivo: PBL4/materiais.py (COM AVISO E SUAS MELHORIAS)
+
 from database import conectar
 from temas import listar_temas
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 import sqlite3 
 from datetime import datetime
+from colorama import Fore, Style # <--- MODIFICAÇÃO 1 (Importação)
 
+#
+# FUNÇÃO DE REGISTRO (COM SUAS MELHORIAS)
+#
 def registrar_material():
-    
+    """
+    Registra um novo material de estudo no banco de dados.
+    """
     print("\n=== REGISTRAR NOVO MATERIAL ===")
     print(aviso_cancelar())
 
@@ -18,7 +26,7 @@ def registrar_material():
         titulo = ler_entrada("\nTítulo: ", str)
         if titulo is None: return
 
-        # Validação de 'tipo'
+        # Validação de 'tipo' (Seu código melhorado)
         tipos_validos = ['artigo', 'vídeo', 'podcast', 'documentação']
         
         while True:
@@ -36,7 +44,7 @@ def registrar_material():
             except ValueError:
                 print(f"\n{erro()} Entrada inválida. Digite apenas o número da opção.")
 
-        # Validação de 'nível'
+        # Validação de 'nível' (Seu código melhorado)
         niveis_validos = ['básico', 'intermediário', 'avançado']
         
         while True:
@@ -53,7 +61,7 @@ def registrar_material():
             except (ValueError, IndexError):
                 print(f"\n{erro()} Entrada inválida. Escolha um entre 1 e {len(niveis_validos)}.")
             
-        # Data (com valor padrão)
+        # Data (com valor padrão) (Seu código melhorado)
         while True:
             data = ler_entrada("\nData (DD/MM/AAAA ou clique Enter para hoje): ", str)
             if data is None:
@@ -70,7 +78,7 @@ def registrar_material():
                 print(f"\n{erro()} Formato de data inválido. Use DD/MM/AAAA (ex: 31/12/2025).")
 
 
-        # Link (obrigatório)
+        # Link (obrigatório) (Seu código melhorado)
         while True:
             link = ler_entrada("\nLink (URL): ", str)
             if link is None:
@@ -87,7 +95,7 @@ def registrar_material():
             else:
                 break
 
-        # Opcionais
+        # Opcionais (Seu código melhorado)
         palavras_chave = ler_entrada("\nPalavras-chave (separadas por vírgula): ", str)
         if palavras_chave is None:
             return
@@ -95,12 +103,16 @@ def registrar_material():
         palavras_chave = palavras_chave.strip()
 
         if not palavras_chave:
-            palavras_chave = " "
+            palavras_chave = " " # Mantive o seu " "
         else:
             palavras_chave = ", ".join([p.strip().lower() for p in palavras_chave.split(",")])
 
         # --- Vinculação de Tema (Novo Sistema) ---
         print("\n--- Vinculação de Tema ---")
+
+        # --- MODIFICAÇÃO 2 (Aviso) ---
+        print(f"{Fore.BLUE}AVISO: Se o tema que você precisa não estiver na lista,\nprimeiro cancele ('.') e use a Opção (1) 'Gerenciar Temas' do menu principal.{Style.RESET_ALL}")
+        
         listar_temas()
         
         id_tema_material = ler_entrada("\nDigite o ID do tema/subtema ao qual este material pertence: ", int)
@@ -140,9 +152,9 @@ def registrar_material():
         if 'conexao' in locals():
             conexao.close()
 
-# =================================================================
-# FUNÇÕES DE CONSULTA (JÁ REFATORADAS)
-# =================================================================
+#
+# (O resto do seu arquivo, com as funções 'consultar', 'remover' e 'editar', continua aqui...)
+#
 
 # --- FUNÇÃO "AJUDANTE" (REFATORADA) ---
 def _exibir_resultados(resultados):
@@ -157,6 +169,7 @@ def _exibir_resultados(resultados):
     cabecalhos = ["ID", "Título", "Tipo", "Nível", "Tema"]
     
     print("\n" + tabela_formatada(cabecalhos, resultados))
+
 
 # --- FUNÇÃO DE CONSULTA (REFATORADA COM JOIN) ---
 def consultar_materiais():
@@ -267,10 +280,8 @@ def consultar_materiais():
         except ValueError:
             print(f"\n{erro()} Entrada inválida. Digite um número.")
 
-# =================================================================
-# FUNÇÃO REMOVER (JÁ REFATORADA)
-# =================================================================
 
+# --- FUNÇÃO PARA REMOVER MATERIAL (JÁ REFATORADA) ---
 def remover_material():
     """
     Remove um material do banco de dados com base no ID. (REFATORADO)
@@ -319,10 +330,8 @@ def remover_material():
         if 'conexao' in locals():
             conexao.close()
 
-# =================================================================
-# FUNÇÃO EDITAR (AGORA REFATORADA)
-# =================================================================
 
+# --- FUNÇÃO PARA EDITAR MATERIAL (JÁ REFATORADA) ---
 def editar_material():
     """
     Edita um material existente (NOVO SISTEMA DE TEMAS).

@@ -1,9 +1,12 @@
+# Arquivo: PBL4/main.py (MENU REORDENADO)
+
+# --- Importações de outros arquivos do PBL4 ---
 from database import criar_banco, conectar
 from usuario import login, cadastrarUsuario
 from formatacoes import erro
 from materiais import registrar_material, consultar_materiais, remover_material, editar_material
 from relatorios import gerar_relatorios 
-from temas import gerenciar_temas # <--- NOVA IMPORTAÇÃO
+from temas import gerenciar_temas
 
 # --- Importações do Python ---
 from colorama import init
@@ -12,12 +15,17 @@ from colorama import init
 init(autoreset=True)
 
 def validarUsuario():
-    # (Função validarUsuario() sem mudanças... pode copiar a sua)
+    """
+    Verifica se existe um usuário cadastrado.
+    (Lógica adaptada do PBL3)
+    """
     conexao = conectar()
     cursor = conexao.cursor()
+
     cursor.execute("SELECT COUNT(*) FROM usuario")
     existeCadastro = cursor.fetchone()[0]
     conexao.close()
+
     if existeCadastro:
         print("\nFaça seu login para continuar")
         if login():
@@ -35,12 +43,13 @@ def menu_principal():
     print("\n======================================")
     print(" $ GERENCIADOR DE MATERIAIS DE ESTUDO $")
     print("======================================")
-    print("(1) Registrar novo material")
-    print("(2) Consultar materiais") 
-    print("(3) Gerar relatórios")
-    print("(4) Remover material")
-    print("(5) Editar material")
-    print("(6) Gerenciar Temas/Subtemas") # <--- NOVA OPÇÃO
+    # MUDANÇA NA ORDEM (Gerenciar Temas agora é 1)
+    print("(1) Gerenciar Temas/Subtemas") #
+    print("(2) Registrar novo material") #
+    print("(3) Consultar materiais") #
+    print("(4) Gerar relatórios") #
+    print("(5) Remover material") #
+    print("(6) Editar material") #
     print("(0) Sair")
     print("--------------------------------------")
 
@@ -67,19 +76,20 @@ def main():
             acao = int(input("\nEscolha uma opção: "))
             print() # Adiciona uma linha em branco
 
+            # MUDANÇA NA ORDEM (Match/Case agora segue o menu)
             match acao:
                 case 1:
-                    registrar_material()
+                    gerenciar_temas() # Agora é a Opção 1
                 case 2:
-                    consultar_materiais()
+                    registrar_material() # Agora é a Opção 2
                 case 3:
-                    gerar_relatorios()
+                    consultar_materiais() # Agora é a Opção 3
                 case 4:
-                    remover_material()
+                    gerar_relatorios() # Agora é a Opção 4
                 case 5:
-                    editar_material()
+                    remover_material() # Agora é a Opção 5
                 case 6:
-                    gerenciar_temas() # <--- NOVA CASE
+                    editar_material() # Agora é a Opção 6
                 case 0:
                     print("==================")
                     print("Programa encerrado")
