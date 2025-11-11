@@ -1,3 +1,5 @@
+# Arquivo: PBL4/materiais.py (ATUALIZADO)
+
 from database import conectar
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 import sqlite3 
@@ -128,7 +130,7 @@ def _exibir_resultados(resultados):
     print("\n" + tabela_formatada(cabecalhos, resultados))
 
 
-# --- FUNÇÃO DE CONSULTA (ATUALIZADA COM FILTRO "TEMA") ---
+# --- FUNÇÃO DE CONSULTA (ATUALIZADA COM FILTRO "DATA") ---
 def consultar_materiais():
     """
     Mostra um menu para consultar os materiais cadastrados.
@@ -138,10 +140,13 @@ def consultar_materiais():
     while True: 
         print(aviso_cancelar()) # Mostra o aviso "Digite . para cancelar"
         
+        # MUDANÇA AQUI: Adicionamos a nova opção (6)
         print("\n(1) Ver todos os materiais cadastrados")
         print("(2) Filtrar por Tipo (artigo, vídeo, etc.)")
         print("(3) Filtrar por Nível (básico, etc.)")
         print("(4) Filtrar por Tema Principal (Tema 1)")
+        print("(5) Filtrar por Palavra-Chave")
+        print("(6) Filtrar por Data Exata (DD/MM/AAAA)")
         print("(0) Voltar ao menu principal")
         
         try:
@@ -220,7 +225,7 @@ def consultar_materiais():
                     if 'conexao' in locals():
                         conexao.close()
 
-            # --- OPÇÃO (4): Filtrar por Tema 1 (CORRIGIDA COM LIKE) ---
+            # --- Opção (4): Filtrar por Tema 1 ---
             elif acao == 4:
                 print("\n--- Filtrar por Tema Principal ---")
                 
@@ -232,13 +237,72 @@ def consultar_materiais():
                     conexao = conectar()
                     cursor = conexao.cursor()
                     
-                    # MUDANÇA AQUI: Trocamos '=' por 'LIKE'
                     sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE tema_1 LIKE ? ORDER BY id"
                     
-                    # MUDANÇA AQUI: Adicionamos '%' para busca "inteligente"
                     filtro_like = f"%{tema_filtro}%"
                     
                     cursor.execute(sql, (filtro_like,))
+                    resultados = cursor.fetchall()
+                    
+                    _exibir_resultados(resultados) 
+
+                except Exception as e:
+                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
+                finally:
+                    if 'conexao' in locals():
+                        conexao.close()
+
+            # --- Opção (5): Filtrar por Palavra-Chave ---
+            elif acao == 5:
+                print("\n--- Filtrar por Palavra-Chave ---")
+                
+                palavra_filtro = ler_entrada("Qual Palavra-Chave você quer filtrar? (ex: python): ", str)
+                if palavra_filtro is None: 
+                    continue 
+                
+                if not palavra_filtro.strip():
+                    print(f"\n{erro()} Você não digitou nenhuma palavra-chave.")
+                    continue 
+
+                try:
+                    conexao = conectar()
+                    cursor = conexao.cursor()
+                    
+                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE palavras_chave LIKE ? ORDER BY id"
+                    
+                    filtro_like = f"%{palavra_filtro}%"
+                    
+                    cursor.execute(sql, (filtro_like,))
+                    resultados = cursor.fetchall()
+                    
+                    _exibir_resultados(resultados) 
+
+                except Exception as e:
+                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
+                finally:
+                    if 'conexao' in locals():
+                        conexao.close()
+
+            # --- NOVA OPÇÃO (6): Filtrar por Data ---
+            elif acao == 6:
+                print("\n--- Filtrar por Data Exata ---")
+                
+                data_filtro = ler_entrada("Qual Data você quer filtrar? (DD/MM/AAAA): ", str)
+                if data_filtro is None: 
+                    continue 
+
+                if not data_filtro.strip():
+                    print(f"\n{erro()} Você não digitou uma data.")
+                    continue 
+                
+                try:
+                    conexao = conectar()
+                    cursor = conexao.cursor()
+                    
+                    # SQL (busca exata) para filtrar pela coluna 'data'
+                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE data = ? ORDER BY id"
+                    
+                    cursor.execute(sql, (data_filtro,))
                     resultados = cursor.fetchall()
                     
                     _exibir_resultados(resultados) 
