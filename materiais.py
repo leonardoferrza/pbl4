@@ -1,16 +1,16 @@
-# Arquivo: PBL4/materiais.py (ATUALIZADO)
-
+# Arquivo: PBL4/materiais.py (VERSÃO FINAL REFATORADA)
 from database import conectar
+# Importamos a lista de temas
+from temas import listar_temas 
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 import sqlite3 
 from datetime import datetime
 
-#
-# FUNÇÃO DE REGISTRO (EXISTENTE - SEM MUDANÇAS)
-#
+# FUNÇÃO DE REGISTRO (JÁ FUNCIONANDO)
+
 def registrar_material():
     """
-    Registra um novo material de estudo no banco de dados.
+    Registra um novo material (NOVO SISTEMA DE TEMAS).
     """
     print("\n=== REGISTRAR NOVO MATERIAL ===")
     print(aviso_cancelar())
@@ -19,12 +19,11 @@ def registrar_material():
         conexao = conectar()
         cursor = conexao.cursor()
 
-        # --- Coleta de Dados ---
+        # --- Coleta de Dados (Sem mudança aqui) ---
         
         titulo = ler_entrada("\nTítulo: ", str)
         if titulo is None: return
 
-        # Validação de 'tipo'
         tipos_validos = ['artigo', 'vídeo', 'podcast', 'documentação']
         while True:
             tipo_prompt = f"\nTipo ({'/'.join(tipos_validos)}): "
@@ -36,7 +35,6 @@ def registrar_material():
             else:
                 print(f"\n{erro()} Tipo inválido. Escolha um dos tipos listados.")
 
-        # Validação de 'nível'
         niveis_validos = ['básico', 'intermediário', 'avançado']
         while True:
             nivel_prompt = f"\nNível ({'/'.join(niveis_validos)}): "
@@ -48,7 +46,6 @@ def registrar_material():
             else:
                 print(f"\n{erro()} Nível inválido. Escolha um dos níveis listados.")
 
-        # Data (com valor padrão)
         data_hoje = datetime.now().strftime("%d/%m/%Y")
         data_prompt = f"\nData (DD/MM/AAAA ou Enter para hoje - {data_hoje}): "
         data = ler_entrada(data_prompt, str)
@@ -56,55 +53,48 @@ def registrar_material():
         if data == "":
             data = data_hoje
 
-        # Link (obrigatório)
         link = ler_entrada("\nLink: ", str)
         if link is None: return
         if not link:
             print(f"\n{erro()} O link é obrigatório.")
             return
 
-        # Opcionais
         palavras_chave = ler_entrada("\nPalavras-chave (separadas por vírgula): ", str)
         if palavras_chave is None: return
 
-        # Hierarquia de Temas
-        print("\n--- Organização por Temas (Nível 1 é obrigatório) ---")
-        tema_1 = ler_entrada("Tema (Nível 1): ", str)
-        if tema_1 is None: return
-        if not tema_1:
-             print(f"\n{erro()} O Tema de Nível 1 é obrigatório.")
-             return
+        # --- Vinculação de Tema (Novo Sistema) ---
+        print("\n--- Vinculação de Tema ---")
+        listar_temas()
+        
+        id_tema_material = ler_entrada("\nDigite o ID do tema/subtema ao qual este material pertence: ", int)
+        if id_tema_material is None: return
+        if id_tema_material == 0:
+            print(f"\n{erro()} ID inválido.")
+            return
 
-        tema_2 = ler_entrada("Subtema (Nível 2) (opcional): ", str)
-        if tema_2 is None: return
-
-        tema_3 = ler_entrada("Subtema (Nível 3) (opcional): ", str)
-        if tema_3 is None: return
-
-        tema_4 = ler_entrada("Subtema (Nível 4) (opcional): ", str)
-        if tema_4 is None: return
-
-        tema_5 = ler_entrada("Subtema (Nível 5) (opcional): ", str)
-        if tema_5 is None: return
-
-        # --- Inserção no Banco ---
+        # --- Inserção no Banco (Novo Sistema) ---
         
         sql = """
-        INSERT INTO materiais (titulo, tipo, nivel, data, link, palavras_chave,
-                               tema_1, tema_2, tema_3, tema_4, tema_5)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO materiais (titulo, tipo, nivel, data, link, 
+                               palavras_chave, id_tema)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """
         
         dados = (titulo, tipo, nivel, data, link, palavras_chave, 
-                 tema_1, tema_2, tema_3, tema_4, tema_5)
+                 id_tema_material)
 
         try:
             cursor.execute(sql, dados)
             conexao.commit()
             print("\nMaterial registrado com sucesso!")
 
-        except sqlite3.IntegrityError:
-            print(f"\n{erro()} Este link já foi cadastrado anteriormente.")
+        except sqlite3.IntegrityError as e:
+            if "UNIQUE constraint failed: materiais.link" in str(e):
+                print(f"\n{erro()} Este link já foi cadastrado anteriormente.")
+            elif "FOREIGN KEY constraint failed" in str(e):
+                 print(f"\n{erro()} O ID de tema '{id_tema_material}' não existe.")
+            else:
+                print(f"\n{erro()} Erro de integridade: {e}")
 
     except Exception as e:
         print(f"\n{erro()} Ocorreu um erro inesperado: {e}")
@@ -113,216 +103,140 @@ def registrar_material():
         if 'conexao' in locals():
             conexao.close()
 
+# =================================================================
+# FUNÇÕES DE CONSULTA (JÁ REFATORADAS)
+# =================================================================
 
-# --- FUNÇÃO "AJUDANTE" (CORRIGIDA PARA NÃO QUEBRAR A TABELA) ---
+# --- FUNÇÃO "AJUDANTE" (REFATORADA) ---
 def _exibir_resultados(resultados):
     """
-    Função interna simples para mostrar os resultados na tabela.
+    Função interna simples para mostrar os resultados (agora com o nome do TEMA).
     """
     if not resultados:
         print("\nNenhum material encontrado com esse critério.")
         return
 
-    # Mostramos um resumo (5 colunas) para caber na tela
-    cabecalhos = ["ID", "Título", "Tipo", "Nível", "Tema Principal (1)"]
+    # Trocamos "Tema Principal (1)" por "Tema"
+    cabecalhos = ["ID", "Título", "Tipo", "Nível", "Tema"]
     
-    # Usa a função do PBL3 para desenhar a tabela
     print("\n" + tabela_formatada(cabecalhos, resultados))
 
-
-# --- FUNÇÃO DE CONSULTA (ATUALIZADA COM FILTRO "DATA") ---
+# --- FUNÇÃO DE CONSULTA (REFATORADA COM JOIN) ---
 def consultar_materiais():
     """
-    Mostra um menu para consultar os materiais cadastrados.
+    Mostra um menu para consultar os materiais (NOVO SISTEMA DE TEMAS).
     """
     print("\n=== CONSULTAR MATERIAIS ===")
     
+    # SQL Base (A parte que se repete)
+    sql_base = """
+    FROM materiais m 
+    LEFT JOIN temas t ON m.id_tema = t.id
+    """
+    
+    # Colunas que queremos mostrar (o resumo)
+    sql_colunas = "SELECT m.id, m.titulo, m.tipo, m.nivel, t.nome "
+
     while True: 
         print(aviso_cancelar()) # Mostra o aviso "Digite . para cancelar"
         
-        # MUDANÇA AQUI: Adicionamos a nova opção (6)
         print("\n(1) Ver todos os materiais cadastrados")
         print("(2) Filtrar por Tipo (artigo, vídeo, etc.)")
         print("(3) Filtrar por Nível (básico, etc.)")
-        print("(4) Filtrar por Tema Principal (Tema 1)")
+        print("(4) Filtrar por Tema")
         print("(5) Filtrar por Palavra-Chave")
         print("(6) Filtrar por Data Exata (DD/MM/AAAA)")
         print("(0) Voltar ao menu principal")
         
         try:
-            # Usamos ler_entrada para permitir '.' (cancelar)
             acao = ler_entrada("\nEscolha uma opção de consulta: ", int)
             
             if acao is None or acao == 0:
                 print("\nRetornando ao menu principal...")
                 break # Sai da função
 
-            # --- Opção (1): Ver Todos ---
-            elif acao == 1:
+            sql_final = sql_colunas + sql_base
+            params = () 
+
+            if acao == 1:
                 print("\n--- Todos os Materiais Cadastrados (Resumo) ---")
-                try:
-                    conexao = conectar()
-                    cursor = conexao.cursor()
-                    
-                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais ORDER BY id"
-                    
-                    cursor.execute(sql)
-                    resultados = cursor.fetchall()
-                    _exibir_resultados(resultados) 
+                sql_final += "ORDER BY m.id"
 
-                except Exception as e:
-                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
-                finally:
-                    if 'conexao' in locals():
-                        conexao.close()
-
-            # --- Opção (2): Filtrar por Tipo ---
             elif acao == 2:
                 print("\n--- Filtrar por Tipo ---")
+                filtro = ler_entrada("Qual tipo você quer filtrar? (ex: vídeo): ", str)
+                if filtro is None: continue 
                 
-                tipo_filtro = ler_entrada("Qual tipo você quer filtrar? (ex: vídeo): ", str)
-                if tipo_filtro is None: 
-                    continue 
-                
-                try:
-                    conexao = conectar()
-                    cursor = conexao.cursor()
-                    
-                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE tipo = ? ORDER BY id"
-                    
-                    cursor.execute(sql, (tipo_filtro.lower(),))
-                    resultados = cursor.fetchall()
-                    _exibir_resultados(resultados) 
+                sql_final += "WHERE m.tipo = ? ORDER BY m.id"
+                params = (filtro.lower(),)
 
-                except Exception as e:
-                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
-                finally:
-                    if 'conexao' in locals():
-                        conexao.close()
-            
-            # --- Opção (3): Filtrar por Nível ---
             elif acao == 3:
                 print("\n--- Filtrar por Nível ---")
+                filtro = ler_entrada("Qual nível você quer filtrar? (ex: básico): ", str)
+                if filtro is None: continue 
                 
-                nivel_filtro = ler_entrada("Qual nível você quer filtrar? (ex: básico): ", str)
-                if nivel_filtro is None: 
-                    continue 
-                
-                try:
-                    conexao = conectar()
-                    cursor = conexao.cursor()
-                    
-                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE nivel = ? ORDER BY id"
-                    
-                    cursor.execute(sql, (nivel_filtro.lower(),))
-                    resultados = cursor.fetchall()
-                    
-                    _exibir_resultados(resultados) 
+                sql_final += "WHERE m.nivel = ? ORDER BY m.id"
+                params = (filtro.lower(),)
 
-                except Exception as e:
-                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
-                finally:
-                    if 'conexao' in locals():
-                        conexao.close()
-
-            # --- Opção (4): Filtrar por Tema 1 ---
             elif acao == 4:
-                print("\n--- Filtrar por Tema Principal ---")
+                print("\n--- Filtrar por Tema ---")
+                filtro = ler_entrada("Qual Tema você quer filtrar? (ex: Python): ", str)
+                if filtro is None: continue 
                 
-                tema_filtro = ler_entrada("Qual Tema Principal você quer filtrar? (ex: artigos): ", str)
-                if tema_filtro is None: 
-                    continue 
-                
-                try:
-                    conexao = conectar()
-                    cursor = conexao.cursor()
-                    
-                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE tema_1 LIKE ? ORDER BY id"
-                    
-                    filtro_like = f"%{tema_filtro}%"
-                    
-                    cursor.execute(sql, (filtro_like,))
-                    resultados = cursor.fetchall()
-                    
-                    _exibir_resultados(resultados) 
+                sql_final += "WHERE t.nome LIKE ? ORDER BY m.id"
+                params = (f"%{filtro}%",)
 
-                except Exception as e:
-                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
-                finally:
-                    if 'conexao' in locals():
-                        conexao.close()
-
-            # --- Opção (5): Filtrar por Palavra-Chave ---
             elif acao == 5:
                 print("\n--- Filtrar por Palavra-Chave ---")
-                
-                palavra_filtro = ler_entrada("Qual Palavra-Chave você quer filtrar? (ex: python): ", str)
-                if palavra_filtro is None: 
-                    continue 
-                
-                if not palavra_filtro.strip():
+                filtro = ler_entrada("Qual Palavra-Chave você quer filtrar? (ex: python): ", str)
+                if filtro is None: continue 
+                if not filtro.strip():
                     print(f"\n{erro()} Você não digitou nenhuma palavra-chave.")
                     continue 
 
-                try:
-                    conexao = conectar()
-                    cursor = conexao.cursor()
-                    
-                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE palavras_chave LIKE ? ORDER BY id"
-                    
-                    filtro_like = f"%{palavra_filtro}%"
-                    
-                    cursor.execute(sql, (filtro_like,))
-                    resultados = cursor.fetchall()
-                    
-                    _exibir_resultados(resultados) 
+                sql_final += "WHERE m.palavras_chave LIKE ? ORDER BY m.id"
+                params = (f"%{filtro}%",)
 
-                except Exception as e:
-                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
-                finally:
-                    if 'conexao' in locals():
-                        conexao.close()
-
-            # --- NOVA OPÇÃO (6): Filtrar por Data ---
             elif acao == 6:
                 print("\n--- Filtrar por Data Exata ---")
-                
-                data_filtro = ler_entrada("Qual Data você quer filtrar? (DD/MM/AAAA): ", str)
-                if data_filtro is None: 
-                    continue 
-
-                if not data_filtro.strip():
+                filtro = ler_entrada("Qual Data você quer filtrar? (DD/MM/AAAA): ", str)
+                if filtro is None: continue 
+                if not filtro.strip():
                     print(f"\n{erro()} Você não digitou uma data.")
                     continue 
                 
-                try:
-                    conexao = conectar()
-                    cursor = conexao.cursor()
-                    
-                    # SQL (busca exata) para filtrar pela coluna 'data'
-                    sql = "SELECT id, titulo, tipo, nivel, tema_1 FROM materiais WHERE data = ? ORDER BY id"
-                    
-                    cursor.execute(sql, (data_filtro,))
-                    resultados = cursor.fetchall()
-                    
-                    _exibir_resultados(resultados) 
-
-                except Exception as e:
-                    print(f"\n{erro()} Erro ao consultar o banco: {e}")
-                finally:
-                    if 'conexao' in locals():
-                        conexao.close()
-
+                sql_final += "WHERE m.data = ? ORDER BY m.id"
+                params = (filtro,)
+            
             else:
-                print(f"\n{erro()} Opção inválida.")
+                print(f"{erro()} Opção inválida.")
+                continue 
+
+            # --- Execução do SQL (Comum a todos) ---
+            try:
+                conexao = conectar()
+                cursor = conexao.cursor()
+                
+                cursor.execute(sql_final, params)
+                resultados = cursor.fetchall()
+                _exibir_resultados(resultados) 
+
+            except Exception as e:
+                print(f"\n{erro()} Erro ao consultar o banco: {e}")
+            finally:
+                if 'conexao' in locals():
+                    conexao.close()
 
         except ValueError:
             print(f"\n{erro()} Entrada inválida. Digite um número.")
 
-# --- FUNÇÃO PARA REMOVER MATERIAL (EXISTENTE) ---
+# =================================================================
+# FUNÇÃO REMOVER (JÁ REFATORADA)
+# =================================================================
+
 def remover_material():
     """
-    Remove um material do banco de dados com base no ID.
+    Remove um material do banco de dados com base no ID. (REFATORADO)
     """
     print("\n=== REMOVER MATERIAL ===")
     print(aviso_cancelar())
@@ -368,11 +282,13 @@ def remover_material():
         if 'conexao' in locals():
             conexao.close()
 
+# =================================================================
+# FUNÇÃO EDITAR (AGORA REFATORADA)
+# =================================================================
 
-# --- FUNÇÃO PARA EDITAR MATERIAL (EXISTENTE) ---
 def editar_material():
     """
-    Edita um material existente no banco de dados com base no ID.
+    Edita um material existente (NOVO SISTEMA DE TEMAS).
     """
     print("\n=== EDITAR MATERIAL ===")
     print(aviso_cancelar())
@@ -380,13 +296,18 @@ def editar_material():
     try:
         # 1. Pede o ID do material
         id_editar = ler_entrada("\nDigite o ID do material que deseja editar: ", int)
-        if id_editar is None:
-            return # Usuário cancelou
+        if id_editar is None: return 
 
-        # 2. Busca os dados atuais desse ID
+        # 2. Busca os dados atuais desse ID (usando JOIN)
         conexao = conectar()
         cursor = conexao.cursor()
-        sql_busca = "SELECT titulo, tipo, nivel, data, link, palavras_chave, tema_1, tema_2, tema_3, tema_4, tema_5 FROM materiais WHERE id = ?"
+        sql_busca = """
+        SELECT m.titulo, m.tipo, m.nivel, m.data, m.link, 
+               m.palavras_chave, m.id_tema, t.nome 
+        FROM materiais m
+        LEFT JOIN temas t ON m.id_tema = t.id
+        WHERE m.id = ?
+        """
         cursor.execute(sql_busca, (id_editar,))
         dados_atuais = cursor.fetchone()
 
@@ -396,14 +317,13 @@ def editar_material():
             return
         
         # Separa os dados atuais
-        (titulo, tipo, nivel, data, link, palavras, t1, t2, t3, t4, t5) = dados_atuais
+        (titulo, tipo, nivel, data, link, palavras, id_tema_atual, nome_tema_atual) = dados_atuais
         
         print("\n--- Editando Material ---")
         print(f"ID: {id_editar}")
         print("Deixe o campo em branco (só apertar Enter) para manter o valor atual.")
 
         # 3. Pede os novos dados (um por um)
-        
         novo_titulo = ler_entrada(f"Título [{titulo}]: ", str) or titulo
 
         # Validação de 'tipo'
@@ -430,26 +350,32 @@ def editar_material():
         novo_link = ler_entrada(f"Link [{link}]: ", str) or link
         novo_palavras = ler_entrada(f"Palavras-chave [{palavras or ''}]: ", str) or palavras
         
-        print("\n--- Editando Temas ---")
-        novo_t1 = ler_entrada(f"Tema 1 [{t1}]: ", str) or t1
-        novo_t2 = ler_entrada(f"Tema 2 [{t2 or ''}]: ", str) or t2
-        novo_t3 = ler_entrada(f"Tema 3 [{t3 or ''}]: ", str) or t3
-        novo_t4 = ler_entrada(f"Tema 4 [{t4 or ''}]: ", str) or t4
-        novo_t5 = ler_entrada(f"Tema 5 [{t5 or ''}]: ", str) or t5
+        print("\n--- Editando Tema ---")
+        # Mostra o tema atual
+        if nome_tema_atual:
+            print(f"Tema Atual: ({id_tema_atual}) {nome_tema_atual}")
+        else:
+            print("Tema Atual: (Nenhum)")
+        
+        # Mostra a árvore de temas para o usuário escolher
+        listar_temas()
+        
+        # Pede o NOVO ID, sugerindo o antigo
+        novo_id_tema = ler_entrada(f"Novo ID do Tema [{id_tema_atual}]: ", int) or id_tema_atual
 
         # 4. Execução da Atualização (SQL UPDATE)
         
         sql_update = """
         UPDATE materiais SET 
             titulo = ?, tipo = ?, nivel = ?, data = ?, link = ?, 
-            palavras_chave = ?, tema_1 = ?, tema_2 = ?, tema_3 = ?, 
-            tema_4 = ?, tema_5 = ?
+            palavras_chave = ?, id_tema = ?
         WHERE id = ? 
         """
         
+        # Tupla com todos os dados novos (SQL agora é mais curto)
         dados_novos = (
             novo_titulo, tipo, nivel, novo_data, novo_link, novo_palavras,
-            novo_t1, novo_t2, novo_t3, novo_t4, novo_t5,
+            novo_id_tema,
             id_editar # O ID é o último, para o 'WHERE id = ?'
         )
 

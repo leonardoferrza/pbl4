@@ -1,12 +1,12 @@
-# Arquivo: PBL4/main.py (ATUALIZADO)
+# Arquivo: PBL4/main.py (ATUALIZADO PARA HIERARQUIA)
 
 # --- Importações de outros arquivos do PBL4 ---
 from database import criar_banco, conectar
 from usuario import login, cadastrarUsuario
 from formatacoes import erro
-# MUDANÇA AQUI: Importamos a nova função 'editar_material'
 from materiais import registrar_material, consultar_materiais, remover_material, editar_material
 from relatorios import gerar_relatorios 
+from temas import gerenciar_temas # <--- NOVA IMPORTAÇÃO
 
 # --- Importações do Python ---
 from colorama import init
@@ -15,17 +15,12 @@ from colorama import init
 init(autoreset=True)
 
 def validarUsuario():
-    """
-    Verifica se existe um usuário cadastrado.
-    (Lógica adaptada do PBL3)
-    """
+    # (Função validarUsuario() sem mudanças... pode copiar a sua)
     conexao = conectar()
     cursor = conexao.cursor()
-
     cursor.execute("SELECT COUNT(*) FROM usuario")
     existeCadastro = cursor.fetchone()[0]
     conexao.close()
-
     if existeCadastro:
         print("\nFaça seu login para continuar")
         if login():
@@ -47,7 +42,8 @@ def menu_principal():
     print("(2) Consultar materiais") 
     print("(3) Gerar relatórios")
     print("(4) Remover material")
-    print("(5) Editar material") # <--- MUDANÇA AQUI
+    print("(5) Editar material")
+    print("(6) Gerenciar Temas/Subtemas") # <--- NOVA OPÇÃO
     print("(0) Sair")
     print("--------------------------------------")
 
@@ -84,7 +80,9 @@ def main():
                 case 4:
                     remover_material()
                 case 5:
-                    editar_material() # <--- MUDANÇA AQUI
+                    editar_material()
+                case 6:
+                    gerenciar_temas() # <--- NOVA CASE
                 case 0:
                     print("==================")
                     print("Programa encerrado")

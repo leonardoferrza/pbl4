@@ -1,3 +1,5 @@
+# Arquivo: PBL4/database.py (VERSÃO HIERÁRQUICA)
+
 import sqlite3
 
 def criar_banco():
@@ -5,8 +7,7 @@ def criar_banco():
     conexao = sqlite3.connect("pbl4.db") 
     cursor = conexao.cursor()
 
-    # 1. Tabela de Usuário (copiada do PBL3 [cite: 46-50], mas mais simples)
-    # Removemos o 'saldo_atual' que não precisamos mais.
+    # 1. Tabela de Usuário (Sem mudanças)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS usuario (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,7 +15,17 @@ def criar_banco():
         senha TEXT NOT NULL
     )""")
 
-    # 2. Tabela Principal de Materiais (aqui fica quase tudo)
+    # 2. NOVA Tabela de Temas
+    # Esta é a tabela que vai guardar a hierarquia
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS temas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        id_pai INTEGER,
+        FOREIGN KEY (id_pai) REFERENCES temas(id)
+    )""")
+
+    # 3. Tabela Principal de Materiais (MODIFICADA)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS materiais (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,16 +34,12 @@ def criar_banco():
         nivel TEXT NOT NULL,
         data TEXT NOT NULL,
         link TEXT NOT NULL UNIQUE,
-        
         palavras_chave TEXT,
         
-        tema_1 TEXT,
-        tema_2 TEXT,
-        tema_3 TEXT,
-        tema_4 TEXT,
-        tema_5 TEXT
+        id_tema INTEGER,
+        
+        FOREIGN KEY (id_tema) REFERENCES temas(id)
     )""")
-    # O 'UNIQUE' no 'link' impede materiais duplicados
     
     conexao.commit() # Salva as alterações
     conexao.close()  # Fecha a conexão

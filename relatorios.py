@@ -1,21 +1,21 @@
-# Arquivo: PBL4/relatorios.py (ATUALIZADO)
+# Arquivo: PBL4/relatorios.py (VERSÃO FINAL REFATORADA)
 
 from database import conectar
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 
 def gerar_relatorios():
     """
-    Mostra um menu para gerar relatórios e estatísticas.
+    Mostra um menu para gerar relatórios (NOVO SISTEMA DE TEMAS).
     """
     print("\n=== GERAR RELATÓRIOS ===")
     
     while True:
         print(aviso_cancelar()) # Mostra "Insira '.' para cancelar"
         
-        # MUDANÇA AQUI: Adicionamos a nova opção (4)
+        # MUDANÇA AQUI: Ajustámos o nome da opção 3
         print("\n(1) Contagem de materiais por Tipo")
         print("(2) Contagem de materiais por Nível")
-        print("(3) Contagem de materiais por Tema Principal (Tema 1)")
+        print("(3) Contagem de materiais por Tema")
         print("(4) Contagem de materiais por Mês/Ano")
         print("(0) Voltar ao menu principal")
         
@@ -26,7 +26,7 @@ def gerar_relatorios():
                 print("\nRetornando ao menu principal...")
                 break # Sai do loop 'while True'
 
-            # --- Opção (1): Contagem por Tipo ---
+            # --- Opção (1): Contagem por Tipo (Sem mudança) ---
             elif acao == 1:
                 print("\n--- Relatório: Contagem por Tipo ---")
                 try:
@@ -47,7 +47,7 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
             
-            # --- Opção (2): Contagem por Nível ---
+            # --- Opção (2): Contagem por Nível (Sem mudança) ---
             elif acao == 2:
                 print("\n--- Relatório: Contagem por Nível ---")
                 try:
@@ -68,19 +68,29 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
 
-            # --- Opção (3): Contagem por Tema 1 ---
+            # --- OPÇÃO (3): Contagem por Tema (REFATORADA) ---
             elif acao == 3:
-                print("\n--- Relatório: Contagem por Tema Principal ---")
+                print("\n--- Relatório: Contagem por Tema ---")
                 try:
                     conexao = conectar()
                     cursor = conexao.cursor()
                     
-                    sql = "SELECT tema_1, COUNT(*) FROM materiais GROUP BY tema_1"
+                    # MUDANÇA AQUI: Usamos JOIN para buscar o nome do tema
+                    sql = """
+                    SELECT 
+                        t.nome, 
+                        COUNT(m.id) 
+                    FROM materiais m
+                    LEFT JOIN temas t ON m.id_tema = t.id
+                    GROUP BY t.nome
+                    """
                     
                     cursor.execute(sql)
                     resultados = cursor.fetchall()
                     
-                    cabecalhos = ["Tema Principal (Tema 1)", "Quantidade Registrada"]
+                    # Novos cabeçalhos
+                    cabecalhos = ["Tema", "Quantidade Registrada"]
+                    
                     print("\n" + tabela_formatada(cabecalhos, resultados))
 
                 except Exception as e:
@@ -89,16 +99,13 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
             
-            # --- NOVA OPÇÃO (4): Contagem por Mês/Ano ---
+            # --- Opção (4): Contagem por Mês/Ano (Sem mudança) ---
             elif acao == 4:
                 print("\n--- Relatório: Contagem por Mês/Ano ---")
                 try:
                     conexao = conectar()
                     cursor = conexao.cursor()
                     
-                    # SQL de Agregação (usando SUBSTR)
-                    # SUBSTR(data, 4, 7) "corta" a data "DD/MM/AAAA"
-                    # para pegar apenas "MM/AAAA" (começa no 4º caractere, pega 7 caracteres)
                     sql = """
                     SELECT 
                         SUBSTR(data, 4, 7) as MesAno, 
@@ -107,7 +114,6 @@ def gerar_relatorios():
                     GROUP BY MesAno
                     ORDER BY SUBSTR(data, 7, 4), SUBSTR(data, 4, 2)
                     """
-                    # O ORDER BY bagunçado é para ordenar por Ano e depois por Mês
                     
                     cursor.execute(sql)
                     resultados = cursor.fetchall()
