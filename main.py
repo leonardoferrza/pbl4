@@ -1,10 +1,12 @@
-# Arquivo: PBL4/main.py
+# Arquivo: PBL4/main.py (ATUALIZADO)
 
 # --- Importações de outros arquivos do PBL4 ---
 from database import criar_banco, conectar
 from usuario import login, cadastrarUsuario
 from formatacoes import erro
-from materiais import registrar_material, consultar_materiais # < IMPORTAÇÃO CORRIGIDA
+# MUDANÇA AQUI: Importamos a nova função 'editar_material'
+from materiais import registrar_material, consultar_materiais, remover_material, editar_material
+from relatorios import gerar_relatorios 
 
 # --- Importações do Python ---
 from colorama import init
@@ -42,8 +44,10 @@ def menu_principal():
     print(" $ GERENCIADOR DE MATERIAIS DE ESTUDO $")
     print("======================================")
     print("(1) Registrar novo material")
-    print("(2) Consultar materiais") # < TEXTO CORRIGIDO
-    print("(3) Relatórios (em breve)")
+    print("(2) Consultar materiais") 
+    print("(3) Gerar relatórios")
+    print("(4) Remover material")
+    print("(5) Editar material") # <--- MUDANÇA AQUI
     print("(0) Sair")
     print("--------------------------------------")
 
@@ -74,14 +78,18 @@ def main():
                 case 1:
                     registrar_material()
                 case 2:
-                    consultar_materiais() # < CASE 2 CORRIGIDA
+                    consultar_materiais()
                 case 3:
-                    print("Função de relatórios ainda não implementada.")
+                    gerar_relatorios()
+                case 4:
+                    remover_material()
+                case 5:
+                    editar_material() # <--- MUDANÇA AQUI
                 case 0:
                     print("==================")
                     print("Programa encerrado")
                     print("==================\n")
-                    break # Quebra o loop 'while True' e encerra
+                    break 
                 case _:
                     print(f"{erro()} Entrada inválida. Digite um dos números listados no menu.")
 
