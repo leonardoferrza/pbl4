@@ -12,10 +12,11 @@ def gerar_relatorios():
     while True:
         print(aviso_cancelar()) # Mostra "Insira '.' para cancelar"
         
-        # MUDANÇA AQUI: Adicionamos a nova opção (3)
+        # MUDANÇA AQUI: Adicionamos a nova opção (4)
         print("\n(1) Contagem de materiais por Tipo")
         print("(2) Contagem de materiais por Nível")
         print("(3) Contagem de materiais por Tema Principal (Tema 1)")
+        print("(4) Contagem de materiais por Mês/Ano")
         print("(0) Voltar ao menu principal")
         
         try:
@@ -67,21 +68,51 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
 
-            # --- NOVA OPÇÃO (3): Contagem por Tema 1 ---
+            # --- Opção (3): Contagem por Tema 1 ---
             elif acao == 3:
                 print("\n--- Relatório: Contagem por Tema Principal ---")
                 try:
                     conexao = conectar()
                     cursor = conexao.cursor()
                     
-                    # SQL de Agregação (só muda o 'GROUP BY')
                     sql = "SELECT tema_1, COUNT(*) FROM materiais GROUP BY tema_1"
                     
                     cursor.execute(sql)
                     resultados = cursor.fetchall()
                     
-                    # Novos cabeçalhos
                     cabecalhos = ["Tema Principal (Tema 1)", "Quantidade Registrada"]
+                    print("\n" + tabela_formatada(cabecalhos, resultados))
+
+                except Exception as e:
+                    print(f"\n{erro()} Erro ao gerar relatório: {e}")
+                finally:
+                    if 'conexao' in locals():
+                        conexao.close()
+            
+            # --- NOVA OPÇÃO (4): Contagem por Mês/Ano ---
+            elif acao == 4:
+                print("\n--- Relatório: Contagem por Mês/Ano ---")
+                try:
+                    conexao = conectar()
+                    cursor = conexao.cursor()
+                    
+                    # SQL de Agregação (usando SUBSTR)
+                    # SUBSTR(data, 4, 7) "corta" a data "DD/MM/AAAA"
+                    # para pegar apenas "MM/AAAA" (começa no 4º caractere, pega 7 caracteres)
+                    sql = """
+                    SELECT 
+                        SUBSTR(data, 4, 7) as MesAno, 
+                        COUNT(*) 
+                    FROM materiais 
+                    GROUP BY MesAno
+                    ORDER BY SUBSTR(data, 7, 4), SUBSTR(data, 4, 2)
+                    """
+                    # O ORDER BY bagunçado é para ordenar por Ano e depois por Mês
+                    
+                    cursor.execute(sql)
+                    resultados = cursor.fetchall()
+                    
+                    cabecalhos = ["Mês/Ano", "Quantidade Registrada"]
                     
                     print("\n" + tabela_formatada(cabecalhos, resultados))
 
