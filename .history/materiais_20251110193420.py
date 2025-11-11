@@ -41,15 +41,3 @@ def registrar_materiais():
             else:
                 print(f"\n{erro()} Níveis inválidos! Escolha um dos níveis da lista.")
                 print(f"\n{erro()} Níveis inválidos! Escolha um dos níveis da lista.")
-    except sqlite3.Error as e:
-        print(f"\n{erro()} Erro no banco de dados: {e}")
-        return
-    except Exception as e:
-        print(f"\n{erro()} Ocorreu um erro: {e}")
-        return
-    finally:
-        try:
-            if 'conexao' in locals() and conexao:
-                conexao.close()
-        except Exception:
-            pass

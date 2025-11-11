@@ -18,6 +18,7 @@ def cadastrarUsuario():
     finally:
         conexao.close()
 
+
 def login():
     limiteDeErros = 3
     conexao = conectar()

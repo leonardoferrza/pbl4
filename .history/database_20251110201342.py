@@ -1,6 +1,7 @@
 import sqlite3
 
 def criar_banco():
+    # Conecta ao banco (ou cria se não existir)
     conexao = sqlite3.connect("sge.db") 
     cursor = conexao.cursor()
 
