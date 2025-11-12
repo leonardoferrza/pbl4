@@ -1,10 +1,12 @@
+# Arquivo: PBL4/materiais.py (COM AVISO E SUAS MELHORIAS)
+
 from database import conectar
 from temas import listar_temas
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 import sqlite3 
 import re
 from datetime import datetime
-from colorama import Fore, Style
+from colorama import Fore, Style # <--- MODIFICAÇÃO 1 (Importação)
 
 #
 # FUNÇÃO DE REGISTRO (COM SUAS MELHORIAS)
@@ -441,4 +443,4 @@ def editar_material():
         print(f"\n{erro()} Erro ao editar material: {e}")
     finally:
         if 'conexao' in locals():
-            conexao.close() 
+            conexao.close()

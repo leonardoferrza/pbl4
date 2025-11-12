@@ -441,4 +441,4 @@ def editar_material():
         print(f"\n{erro()} Erro ao editar material: {e}")
     finally:
         if 'conexao' in locals():
-            conexao.close() 
+            conexao.close() ☠️

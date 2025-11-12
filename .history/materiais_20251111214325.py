@@ -1,3 +1,5 @@
+# Arquivo: PBL4/materiais.py (COM AVISO E SUAS MELHORIAS)
+
 from database import conectar
 from temas import listar_temas
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
@@ -441,4 +443,4 @@ def editar_material():
         print(f"\n{erro()} Erro ao editar material: {e}")
     finally:
         if 'conexao' in locals():
-            conexao.close() 
+            conexao.close()
