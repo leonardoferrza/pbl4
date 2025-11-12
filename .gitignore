@@ -4,3 +4,4 @@ __pycache__/
 
 # Ignorar o arquivo do banco de dados
 pbl4.db
+/sge.db
