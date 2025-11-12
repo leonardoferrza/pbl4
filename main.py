@@ -10,7 +10,6 @@ from colorama import init
 
 init(autoreset=True)
 
-# Função para validar o usuário
 def validarUsuario():
     
     conexao = conectar()
@@ -23,18 +22,18 @@ def validarUsuario():
     if existeCadastro:
         print("\nFaça seu login para continuar")
         if login():
-            return 1 # Login com sucesso
+            return 1 
         else:
-            return validarUsuario() # Tenta de novo
+            return validarUsuario()
     else:
         print("\nCadastre-se para começar")
         cadastrarUsuario()
-        return 1 # Cadastro com sucesso
+        return 1
 
 def menu_principal():
-    print("\n======================================")
+    print("\n===========================================")
     print(" 📚 GERENCIADOR DE MATERIAIS DE ESTUDO 📚")
-    print("======================================")
+    print("===========================================")
     print("(1) Gerenciar Temas/Subtemas") 
     print("(2) Registrar novo material") 
     print("(3) Consultar materiais") 
@@ -44,27 +43,24 @@ def menu_principal():
     print("(0) Sair")
     print("--------------------------------------")
 
-# Função Principal do Programa 
+
 def main():
     print("\n=============")
     print("BEM-VINDO(A)!")
     print("=============")
 
-    # 1. Garante que o banco e as tabelas existam
     criar_banco()
 
-    # 2. Valida o usuário (força login ou cadastro)
     if not validarUsuario():
         print("\nFalha na autenticação. Encerrando.")
-        return # Encerra o programa se a validação falhar
+        return
 
-    # 3. Loop do Menu Principal
     while True:
         menu_principal()
         
         try:
             acao = int(input("\nEscolha uma opção: "))
-            print() # Adiciona uma linha em branco
+            print()
 
             match acao:
                 case 1:
@@ -89,7 +85,6 @@ def main():
 
         except ValueError:
             print(f"\n{erro()} Entrada inválida. Digite um número inteiro.")
-
-# Ponto de Entrada do Script 
+ 
 if __name__ == "__main__":
     main()

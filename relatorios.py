@@ -2,13 +2,11 @@ from database import conectar
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 
 def gerar_relatorios():
-    """
-    Mostra um menu para gerar relatórios (NOVO SISTEMA DE TEMAS).
-    """
+
     print("\n=== GERAR RELATÓRIOS ===")
     
     while True:
-        print(aviso_cancelar()) # Mostra "Insira '.' para cancelar"
+        print(aviso_cancelar())
         
         print("\n(1) Contagem de materiais por Tipo")
         print("(2) Contagem de materiais por Nível")
@@ -22,9 +20,9 @@ def gerar_relatorios():
             
             if acao is None or acao == 0:
                 print("\nRetornando ao menu principal...")
-                break # Sai do loop 'while True'
+                break
 
-            # --- Opção (1): Contagem por Tipo ---
+            # contagem por tipo
             elif acao == 1:
                 print("\n--- Relatório: Contagem por Tipo ---")
                 try:
@@ -45,7 +43,7 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
             
-            # --- Opção (2): Contagem por Nível ---
+            # contagem por nivel
             elif acao == 2:
                 print("\n--- Relatório: Contagem por Nível ---")
                 try:
@@ -66,7 +64,7 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
 
-            # --- Opção (3): Contagem por Tema ---
+            # contagem por tema
             elif acao == 3:
                 print("\n--- Relatório: Contagem por Tema ---")
                 try:
@@ -94,7 +92,7 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
             
-            # --- Opção (4): Contagem por Mês/Ano ---
+            # contagem por mes/ano
             elif acao == 4:
                 print("\n--- Relatório: Contagem por Mês/Ano ---")
                 try:
@@ -123,14 +121,13 @@ def gerar_relatorios():
                     if 'conexao' in locals():
                         conexao.close()
 
-            # --- NOVA OPÇÃO (5): Média por Mês/Ano ---
+            # media mes/ano
             elif acao == 5:
                 print("\n--- Relatório: Média de Materiais por Mês ---")
                 try:
                     conexao = conectar()
                     cursor = conexao.cursor()
                     
-                    # SQL com Sub-consulta
                     sql = """
                     SELECT AVG(Contagem) 
                     FROM (
@@ -141,7 +138,6 @@ def gerar_relatorios():
                     """
                     
                     cursor.execute(sql)
-                    # Pega apenas o primeiro (e único) resultado
                     media = cursor.fetchone()[0]
                     
                     if media is None:
