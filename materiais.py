@@ -284,11 +284,7 @@ def remover_material():
         if id_remover is None:
             return
 
-<<<<<<< HEAD
-        # Confirmação
-=======
         # confirmação
->>>>>>> 1ef21bf1fd10286ca9dcc70c5689bbfceeb0c211
         while True:
             confirmacao = ler_entrada(f"\nTem certeza que deseja remover o material ID {id_remover}? (S/N): ", str)
             if confirmacao is None: return
@@ -325,11 +321,6 @@ def remover_material():
 
 # edita material
 def editar_material():
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 1ef21bf1fd10286ca9dcc70c5689bbfceeb0c211
     print("\n=== EDITAR MATERIAL ===")
     print(aviso_cancelar())
 
@@ -432,10 +423,6 @@ def editar_material():
 
         # atualização do banco de dados
 
-<<<<<<< HEAD
-        # 4. Execução da Atualização (SQL UPDATE)
-=======
->>>>>>> 1ef21bf1fd10286ca9dcc70c5689bbfceeb0c211
         sql_update = """
         UPDATE materiais SET 
             titulo = ?, tipo = ?, nivel = ?, data = ?, link = ?, 
