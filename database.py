@@ -30,7 +30,7 @@ def criar_banco():
     """)
     # O 'UNIQUE' no 'link' impede materiais duplicados
 
-    # 2. NOVA Tabela de Temas (Esta é a tabela que vai guardar a hierarquia)
+    # 2. Tabela de Temas (Esta é a tabela que vai guardar a hierarquia)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS temas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

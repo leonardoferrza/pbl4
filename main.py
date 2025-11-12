@@ -1,6 +1,3 @@
-# Arquivo: PBL4/main.py (MENU REORDENADO)
-
-# --- Importações de outros arquivos do PBL4 ---
 from database import criar_banco, conectar
 from usuario import login, cadastrarUsuario
 from formatacoes import erro
@@ -8,10 +5,9 @@ from materiais import registrar_material, consultar_materiais, remover_material,
 from relatorios import gerar_relatorios 
 from temas import gerenciar_temas
 
-# --- Importações do Python ---
+
 from colorama import init
 
-# Inicializa o Colorama (para o 'erro()' funcionar)
 init(autoreset=True)
 
 def validarUsuario():
@@ -39,22 +35,20 @@ def validarUsuario():
 
 
 def menu_principal():
-    """Mostra o menu de opções do PBL4."""
     print("\n======================================")
-    print(" $ GERENCIADOR DE MATERIAIS DE ESTUDO $")
+    print("📚 GERENCIADOR DE MATERIAIS DE ESTUDO 📚")
     print("======================================")
-    # MUDANÇA NA ORDEM (Gerenciar Temas agora é 1)
-    print("(1) Gerenciar Temas/Subtemas") #
-    print("(2) Registrar novo material") #
-    print("(3) Consultar materiais") #
-    print("(4) Gerar relatórios") #
-    print("(5) Remover material") #
-    print("(6) Editar material") #
+    print("(1) Gerenciar Temas/Subtemas") 
+    print("(2) Registrar novo material") 
+    print("(3) Consultar materiais") 
+    print("(4) Gerar relatórios") 
+    print("(5) Remover material") 
+    print("(6) Editar material") 
     print("(0) Sair")
     print("--------------------------------------")
 
 
-# --- Função Principal do Programa ---
+# Função Principal do Programa 
 def main():
     print("\n=============")
     print("BEM-VINDO(A)!")
@@ -76,7 +70,6 @@ def main():
             acao = int(input("\nEscolha uma opção: "))
             print() # Adiciona uma linha em branco
 
-            # MUDANÇA NA ORDEM (Match/Case agora segue o menu)
             match acao:
                 case 1:
                     gerenciar_temas() # Agora é a Opção 1
@@ -102,6 +95,6 @@ def main():
             print(f"\n{erro()} Entrada inválida. Digite um número inteiro.")
 
 
-# --- Ponto de Entrada do Script ---
+# Ponto de Entrada do Script 
 if __name__ == "__main__":
     main()

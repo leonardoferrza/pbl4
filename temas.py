@@ -1,11 +1,11 @@
 from database import conectar
 from formatacoes import ler_entrada, aviso_cancelar, erro
 
-# --- Funções de Listagem (A parte mais importante) ---
+#Funções de Listagem (A parte mais importante)
 
 def _mostrar_temas_recursivo(cursor, id_pai, nivel):
     """
-    Função "mágica" interna que busca os subtemas
+    Função interna que busca os subtemas
     e se chama novamente, aumentando o recuo (nível).
     """
     # Encontra todos os temas que são "filhos" do id_pai atual
@@ -23,7 +23,6 @@ def _mostrar_temas_recursivo(cursor, id_pai, nivel):
         recuo = "  " * nivel # Cria o recuo (ex: Nível 2 = "    ")
         print(f"{recuo}- ({id_tema}) {nome}")
         
-        # MÁGICA (Recursão):
         # Pede para esta mesma função encontrar os filhos DESTE tema
         _mostrar_temas_recursivo(cursor, id_tema, nivel + 1)
 
@@ -36,7 +35,7 @@ def listar_temas():
         conexao = conectar()
         cursor = conexao.cursor()
         
-        # Começa a busca "mágica" a partir do topo (id_pai = None)
+        # Começa a busca a partir do topo (id_pai = None)
         _mostrar_temas_recursivo(cursor, None, 0)
         
     except Exception as e:
@@ -47,7 +46,7 @@ def listar_temas():
     print("-" * 30)
 
 
-# --- Funções de Gerenciamento ---
+#Funções de Gerenciamento
 
 def criar_tema():
     """
@@ -138,7 +137,7 @@ def remover_tema():
             conexao.close()
 
 
-# --- Função Principal do Módulo ---
+#Função Principal do Módulo
 
 def gerenciar_temas():
     """

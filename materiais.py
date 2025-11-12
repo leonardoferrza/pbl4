@@ -6,9 +6,7 @@ import re
 from datetime import datetime
 from colorama import Fore, Style
 
-#
-# FUNÇÃO DE REGISTRO (COM SUAS MELHORIAS)
-#
+# FUNÇÃO DE REGISTRO 
 def registrar_material():
     """
     Registra um novo material de estudo no banco de dados.
@@ -25,7 +23,7 @@ def registrar_material():
         titulo = ler_entrada("\nTítulo: ", str)
         if titulo is None: return
 
-        # Validação de 'tipo' (Seu código melhorado)
+        # Validação de 'tipo' 
         tipos_validos = ['artigo', 'vídeo', 'podcast', 'documentação']
         
         while True:
@@ -43,7 +41,7 @@ def registrar_material():
             except ValueError:
                 print(f"\n{erro()} Entrada inválida. Digite apenas o número da opção.")
 
-        # Validação de 'nível' (Seu código melhorado)
+        # Validação de 'nível' 
         niveis_validos = ['básico', 'intermediário', 'avançado']
         
         while True:
@@ -60,7 +58,7 @@ def registrar_material():
             except (ValueError, IndexError):
                 print(f"\n{erro()} Entrada inválida. Escolha um entre 1 e {len(niveis_validos)}.")
             
-        # Data (com valor padrão) (Seu código melhorado)
+        # Data (com valor padrão) 
         while True:
             data = ler_entrada("\nData (DD/MM/AAAA ou clique Enter para hoje): ", str)
             if data is None:
@@ -77,7 +75,7 @@ def registrar_material():
                 print(f"\n{erro()} Formato de data inválido. Use DD/MM/AAAA (ex: 31/12/2025).")
 
 
-        # Link (obrigatório) (Seu código melhorado)
+        # Link (obrigatório) 
         while True:
             link = ler_entrada("\nLink (URL): ", str)
             if link is None:
@@ -101,7 +99,7 @@ def registrar_material():
             
             break
 
-        # Opcionais (Seu código melhorado)
+        # Palavras-chave
         palavras_chave = ler_entrada("\nPalavras-chave (separadas por vírgula): ", str)
         if palavras_chave is None:
             return
@@ -113,13 +111,13 @@ def registrar_material():
         else:
             palavras_chave = ", ".join([p.strip().lower() for p in palavras_chave.split(",")])
 
-        # --- Vinculação de Tema (Novo Sistema) ---
+        #Vinculação de Tema 
         print("\n--- Vinculação de Tema ---")
         print(f"{Fore.BLUE}AVISO: Se o tema que você precisa não estiver na lista,\nprimeiro cancele ('.') e use a Opção (1) 'Gerenciar Temas' do menu principal.{Style.RESET_ALL}")
 
-        listar_temas() #
+        listar_temas() 
 
-        while True: # <--- MUDANÇA AQUI (Início do loop)
+        while True: # Início do loop
             id_tema_material = ler_entrada("\nDigite o ID do tema/subtema ao qual este material pertence: ", int)
             if id_tema_material is None: return # Usuário cancelou
 
@@ -127,7 +125,7 @@ def registrar_material():
                 print(f"\n{erro()} ID inválido. Tente novamente.")
                 continue # Volta ao início do loop
 
-            # --- VALIDAÇÃO EXTRA ---
+            # VALIDAÇÃO EXTRA 
             # Checa se o ID existe na tabela de temas
             cursor.execute("SELECT id FROM temas WHERE id = ?", (id_tema_material,))
             if cursor.fetchone():
@@ -137,7 +135,7 @@ def registrar_material():
                 # O ID não existe
                 print(f"\n{erro()} O ID de tema '{id_tema_material}' não existe. Tente novamente.")
                 # O loop vai repetir
-#--- Inserção no Banco (Novo Sistema) ---
+#Inserção no Banco
         sql = """
         INSERT INTO materiais (titulo, tipo, nivel, data, link, 
                                palavras_chave, id_tema)
@@ -152,9 +150,7 @@ def registrar_material():
             conexao.commit()
             print("\nMaterial registrado com sucesso!")
 
-        except sqlite3.IntegrityError as e: # <--- MUDANÇA AQUI
-            # O erro de FOREIGN KEY não deve mais acontecer aqui,
-            # mas o de LINK duplicado ainda pode.
+        except sqlite3.IntegrityError as e: 
             if "UNIQUE constraint failed: materiais.link" in str(e): #
                 print(f"\n{erro()} Este link já foi cadastrado anteriormente.")
             else:
@@ -167,15 +163,9 @@ def registrar_material():
         if 'conexao' in locals():
             conexao.close()
 
-#
-# (O resto do seu arquivo, com as funções 'consultar', 'remover' e 'editar', continua aqui...)
-#
-
-# --- FUNÇÃO "AJUDANTE" (REFATORADA) ---
+# função interna para exibir resultados
 def _exibir_resultados(resultados):
-    """
-    Função interna simples para mostrar os resultados (agora com o nome do TEMA).
-    """
+
     if not resultados:
         print("\nNenhum material encontrado com esse critério.")
         return
@@ -186,14 +176,12 @@ def _exibir_resultados(resultados):
     print("\n" + tabela_formatada(cabecalhos, resultados))
 
 
-# --- FUNÇÃO DE CONSULTA (REFATORADA COM JOIN) ---
+#Função de Consulta
 def consultar_materiais():
-    """
-    Mostra um menu para consultar os materiais (NOVO SISTEMA DE TEMAS).
-    """
+    
     print("\n=== CONSULTAR MATERIAIS ===")
     
-    # SQL Base (A parte que se repete)
+    # SQL Base para consultas
     sql_base = """
     FROM materiais m 
     LEFT JOIN temas t ON m.id_tema = t.id
@@ -277,7 +265,7 @@ def consultar_materiais():
                 print(f"{erro()} Opção inválida.")
                 continue 
 
-            # --- Execução do SQL (Comum a todos) ---
+            # Execução do SQL 
             try:
                 conexao = conectar()
                 cursor = conexao.cursor()
@@ -296,10 +284,10 @@ def consultar_materiais():
             print(f"\n{erro()} Entrada inválida. Digite um número.")
 
 
-# --- FUNÇÃO PARA REMOVER MATERIAL (JÁ REFATORADA) ---
+# Função para remover material
 def remover_material():
     """
-    Remove um material do banco de dados com base no ID. (REFATORADO)
+    Remove um material do banco de dados com base no ID. 
     """
     print("\n=== REMOVER MATERIAL ===")
     print(aviso_cancelar())
@@ -323,7 +311,7 @@ def remover_material():
             else:
                 print(f"\n{erro()} Digite 'S' para sim ou 'N' para não.")
 
-        # --- Execução da Remoção ---
+        # Execução da Remoção 
         conexao = conectar()
         cursor = conexao.cursor()
         
@@ -345,11 +333,10 @@ def remover_material():
         if 'conexao' in locals():
             conexao.close()
 
-
-# --- FUNÇÃO PARA EDITAR MATERIAL (JÁ REFATORADA) ---
+# Função para editar material
 def editar_material():
     """
-    Edita um material existente (NOVO SISTEMA DE TEMAS).
+    Edita um material existente 
     """
     print("\n=== EDITAR MATERIAL ===")
     print(aviso_cancelar())

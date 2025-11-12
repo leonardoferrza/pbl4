@@ -10,7 +10,6 @@ def gerar_relatorios():
     while True:
         print(aviso_cancelar()) # Mostra "Insira '.' para cancelar"
         
-        # MUDANÇA AQUI: Adicionamos a nova opção (5)
         print("\n(1) Contagem de materiais por Tipo")
         print("(2) Contagem de materiais por Nível")
         print("(3) Contagem de materiais por Tema")
