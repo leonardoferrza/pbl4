@@ -10,11 +10,9 @@ from colorama import init
 
 init(autoreset=True)
 
+# Função para validar o usuário
 def validarUsuario():
-    """
-    Verifica se existe um usuário cadastrado.
-    (Lógica adaptada do PBL3)
-    """
+    
     conexao = conectar()
     cursor = conexao.cursor()
 
@@ -33,10 +31,9 @@ def validarUsuario():
         cadastrarUsuario()
         return 1 # Cadastro com sucesso
 
-
 def menu_principal():
     print("\n======================================")
-    print("📚 GERENCIADOR DE MATERIAIS DE ESTUDO 📚")
+    print(" 📚 GERENCIADOR DE MATERIAIS DE ESTUDO 📚")
     print("======================================")
     print("(1) Gerenciar Temas/Subtemas") 
     print("(2) Registrar novo material") 
@@ -46,7 +43,6 @@ def menu_principal():
     print("(6) Editar material") 
     print("(0) Sair")
     print("--------------------------------------")
-
 
 # Função Principal do Programa 
 def main():
@@ -72,17 +68,17 @@ def main():
 
             match acao:
                 case 1:
-                    gerenciar_temas() # Agora é a Opção 1
+                    gerenciar_temas() 
                 case 2:
-                    registrar_material() # Agora é a Opção 2
+                    registrar_material() 
                 case 3:
-                    consultar_materiais() # Agora é a Opção 3
+                    consultar_materiais() 
                 case 4:
-                    gerar_relatorios() # Agora é a Opção 4
+                    gerar_relatorios() 
                 case 5:
-                    remover_material() # Agora é a Opção 5
+                    remover_material() 
                 case 6:
-                    editar_material() # Agora é a Opção 6
+                    editar_material() 
                 case 0:
                     print("==================")
                     print("Programa encerrado")
@@ -93,7 +89,6 @@ def main():
 
         except ValueError:
             print(f"\n{erro()} Entrada inválida. Digite um número inteiro.")
-
 
 # Ponto de Entrada do Script 
 if __name__ == "__main__":
