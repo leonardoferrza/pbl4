@@ -297,7 +297,7 @@ def remover_material():
         if id_remover is None:
             return # Usuário cancelou
 
-        # --- Confirmação ---
+        # Confirmação
         while True:
             confirmacao = ler_entrada(f"\nTem certeza que deseja remover o material ID {id_remover}? (S/N): ", str)
             if confirmacao is None:
@@ -335,9 +335,7 @@ def remover_material():
 
 # Função para editar material
 def editar_material():
-    """
-    Edita um material existente 
-    """
+    
     print("\n=== EDITAR MATERIAL ===")
     print(aviso_cancelar())
 
@@ -412,7 +410,6 @@ def editar_material():
         novo_id_tema = ler_entrada(f"Novo ID do Tema [{id_tema_atual}]: ", int) or id_tema_atual
 
         # 4. Execução da Atualização (SQL UPDATE)
-        
         sql_update = """
         UPDATE materiais SET 
             titulo = ?, tipo = ?, nivel = ?, data = ?, link = ?, 
