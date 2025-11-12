@@ -1,10 +1,12 @@
+# Arquivo: PBL4/materiais.py (COM AVISO E SUAS MELHORIAS)
+
 from database import conectar
 from temas import listar_temas
 from formatacoes import ler_entrada, aviso_cancelar, erro, tabela_formatada
 import sqlite3 
 import re
 from datetime import datetime
-from colorama import Fore, Style
+from colorama import Fore, Style # <--- MODIFICAÇÃO 1 (Importação)
 
 #
 # FUNÇÃO DE REGISTRO (COM SUAS MELHORIAS)
@@ -52,7 +54,7 @@ def registrar_material():
                 print(f"{n}. {niveis.capitalize()}")
 
             try:
-                escolha_nivel = ler_entrada("\nDigite o número correspondente: ", int)
+                escolha_nivel = ler_entrada("\nDigite o número correspondente:", int)
                 if escolha_nivel is None:
                     return
                 nivel = niveis_validos[escolha_nivel - 1]
@@ -115,35 +117,26 @@ def registrar_material():
 
         # --- Vinculação de Tema (Novo Sistema) ---
         print("\n--- Vinculação de Tema ---")
+
+        # --- MODIFICAÇÃO 2 (Aviso) ---
         print(f"{Fore.BLUE}AVISO: Se o tema que você precisa não estiver na lista,\nprimeiro cancele ('.') e use a Opção (1) 'Gerenciar Temas' do menu principal.{Style.RESET_ALL}")
+        
+        listar_temas()
+        
+        id_tema_material = ler_entrada("\nDigite o ID do tema/subtema ao qual este material pertence: ", int)
+        if id_tema_material is None: return
+        if id_tema_material == 0:
+            print(f"\n{erro()} ID inválido.")
+            return
 
-        listar_temas() #
-
-        while True: # <--- MUDANÇA AQUI (Início do loop)
-            id_tema_material = ler_entrada("\nDigite o ID do tema/subtema ao qual este material pertence: ", int)
-            if id_tema_material is None: return # Usuário cancelou
-
-            if id_tema_material == 0:
-                print(f"\n{erro()} ID inválido. Tente novamente.")
-                continue # Volta ao início do loop
-
-            # --- VALIDAÇÃO EXTRA ---
-            # Checa se o ID existe na tabela de temas
-            cursor.execute("SELECT id FROM temas WHERE id = ?", (id_tema_material,))
-            if cursor.fetchone():
-                # O ID existe!
-                break # Sai do loop e continua o cadastro
-            else:
-                # O ID não existe
-                print(f"\n{erro()} O ID de tema '{id_tema_material}' não existe. Tente novamente.")
-                # O loop vai repetir
-#--- Inserção no Banco (Novo Sistema) ---
+        # --- Inserção no Banco (Novo Sistema) ---
+        
         sql = """
         INSERT INTO materiais (titulo, tipo, nivel, data, link, 
                                palavras_chave, id_tema)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """
-
+        
         dados = (titulo, tipo, nivel, data, link, palavras_chave, 
                  id_tema_material)
 
@@ -152,11 +145,11 @@ def registrar_material():
             conexao.commit()
             print("\nMaterial registrado com sucesso!")
 
-        except sqlite3.IntegrityError as e: # <--- MUDANÇA AQUI
-            # O erro de FOREIGN KEY não deve mais acontecer aqui,
-            # mas o de LINK duplicado ainda pode.
-            if "UNIQUE constraint failed: materiais.link" in str(e): #
+        except sqlite3.IntegrityError as e:
+            if "UNIQUE constraint failed: materiais.link" in str(e):
                 print(f"\n{erro()} Este link já foi cadastrado anteriormente.")
+            elif "FOREIGN KEY constraint failed" in str(e):
+                 print(f"\n{erro()} O ID de tema '{id_tema_material}' não existe.")
             else:
                 print(f"\n{erro()} Erro de integridade: {e}")
 
@@ -450,4 +443,4 @@ def editar_material():
         print(f"\n{erro()} Erro ao editar material: {e}")
     finally:
         if 'conexao' in locals():
-            conexao.close() 
+            conexao.close()
