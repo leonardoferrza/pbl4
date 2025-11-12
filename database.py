@@ -4,7 +4,7 @@ def criar_banco():
     conexao = sqlite3.connect("sge.db") 
     cursor = conexao.cursor()
 
-    # 1. Tabela de Usuário
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS usuario (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,7 +13,7 @@ def criar_banco():
     )
     """)
 
-    # 2. Tabela Principal de Materiais
+    # tabela de materiais
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS materiais (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +30,7 @@ def criar_banco():
     """)
     # O 'UNIQUE' no 'link' impede materiais duplicados
 
-    # 2. Tabela de Temas (Esta é a tabela que vai guardar a hierarquia)
+    # tabela de temas (vai guardar a hierarquia)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS temas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
