@@ -43,4 +43,6 @@ def criar_banco():
     conexao.close()  
 
 def conectar():
-    return sqlite3.connect("sge.db")
+    conexao = sqlite3.connect("sge.db")
+    conexao.execute("PRAGMA foreign_keys = ON")
+    return conexao
