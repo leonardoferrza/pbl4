@@ -87,7 +87,7 @@ def registrar_material():
             # Verificação no banco
             cursor.execute("SELECT id FROM materiais WHERE link = ?", (link,))
             if cursor.fetchone():
-                print(f"\n{erro()} Este link já foi cadastrado. Tente outro ou deixe vazio.")
+                print(f"\n{erro()} Este link já foi cadastrado. Tente outro.")
                 continue
             
             break

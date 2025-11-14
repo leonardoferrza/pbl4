@@ -20,7 +20,7 @@ def registrar_material():
         if titulo is None: return
 
         # valida o tipo 
-        tipos_validos = ['artigo', 'audiolivro', 'aula', 'curso', 'documentação', 'ebook', 'exercício', 'livro', 'mentoria', 'podcast', 'projeto', 'repositório', 'roadmap', 'tutorial', 'vídeo']
+        tipos_validos = ['artigo', 'aula', 'curso', 'documentação', 'exercício', 'vídeo', 'podcast', 'documentação']
         
         while True:
             print("\nEscolha o tipo de material:")
@@ -69,17 +69,16 @@ def registrar_material():
 
 
         # Link (obrigatório) 
-        padrao_url = re.compile(r'^(https?://)'r'([a-zA-Z0-9-]+\.)+'r'([a-zA-Z]{2,})'r'(/[^\s]*)?$')
-
         while True:
-            link = ler_entrada("\nLink (pressione Enter se não houver): ", str)
+            link = ler_entrada("\nLink (URL): ", str)
             if link is None: return
             link = link.strip()
             
-            if link == "":
-                link = None
-                break
-            
+            if not link:
+                print(f"\n{erro()} O link é obrigatório.")
+                continue
+
+            padrao_url = re.compile(r'^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$')
             if not padrao_url.match(link):
                 print(f"\n{erro()} Insira uma URL válida (começando com http:// ou https://).")
                 continue
@@ -87,7 +86,7 @@ def registrar_material():
             # Verificação no banco
             cursor.execute("SELECT id FROM materiais WHERE link = ?", (link,))
             if cursor.fetchone():
-                print(f"\n{erro()} Este link já foi cadastrado. Tente outro ou deixe vazio.")
+                print(f"\n{erro()} Este link já foi cadastrado. Tente outro.")
                 continue
             
             break

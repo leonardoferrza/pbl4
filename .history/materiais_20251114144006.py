@@ -76,9 +76,10 @@ def registrar_material():
             if link is None: return
             link = link.strip()
             
-            if link == "":
+            if not link:
                 link = None
                 break
+
             
             if not padrao_url.match(link):
                 print(f"\n{erro()} Insira uma URL válida (começando com http:// ou https://).")
@@ -87,7 +88,7 @@ def registrar_material():
             # Verificação no banco
             cursor.execute("SELECT id FROM materiais WHERE link = ?", (link,))
             if cursor.fetchone():
-                print(f"\n{erro()} Este link já foi cadastrado. Tente outro ou deixe vazio.")
+                print(f"\n{erro()} Este link já foi cadastrado. Tente outro.")
                 continue
             
             break
