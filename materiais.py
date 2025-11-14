@@ -20,7 +20,7 @@ def registrar_material():
         if titulo is None: return
 
         # valida o tipo 
-        tipos_validos = ['artigo', 'vídeo', 'podcast', 'documentação']
+        tipos_validos = ['artigo', 'vídeo', 'podcast', 'documentação', 'livro', 'curso']
         
         while True:
             print("\nEscolha o tipo de material:")
@@ -68,20 +68,17 @@ def registrar_material():
                 print(f"\n{erro()} Formato de data inválido. Use DD/MM/AAAA (ex: 31/12/2025).")
 
 
-        # Link (obrigatório) 
+        # Link
         while True:
             link = ler_entrada("\nLink (URL): ", str)
             if link is None: return
             link = link.strip()
-            
-            if not link:
-                print(f"\n{erro()} O link é obrigatório.")
-                continue
 
-            padrao_url = re.compile(r'^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$')
-            if not padrao_url.match(link):
-                print(f"\n{erro()} Insira uma URL válida (começando com http:// ou https://).")
-                continue
+            if link:
+                padrao_url = re.compile(r'^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$')
+                if not padrao_url.match(link):
+                    print(f"\n{erro()} Insira uma URL válida (começando com http:// ou https://).")
+                    continue
 
             # Verificação no banco
             cursor.execute("SELECT id FROM materiais WHERE link = ?", (link,))
@@ -325,29 +322,37 @@ def editar_material():
     print(aviso_cancelar())
 
     try:
-        # pede o ID do material
-        id_editar = ler_entrada("\nDigite o ID do material que deseja editar: ", int)
-        if id_editar is None: return 
-
-        # busca os dados atuais desse ID (JOIN LEFT -> traz todos os registros de materiais, 
-        # mesmo que não tenham correspondência em temas). Se um material não tiver tema associado, 
-        # ele ainda aparecerá no resultado, mas os campos da tabela temas virão como NULL
         conexao = conectar()
         cursor = conexao.cursor()
-        sql_busca = """
-        SELECT m.titulo, m.tipo, m.nivel, m.data, m.link, 
-               m.palavras_chave, m.id_tema, t.nome 
-        FROM materiais m
-        LEFT JOIN temas t ON m.id_tema = t.id
-        WHERE m.id = ?
-        """
-        cursor.execute(sql_busca, (id_editar,))
-        dados_atuais = cursor.fetchone()
 
-        if dados_atuais is None:
-            print(f"\n{erro()} Nenhum material encontrado com o ID {id_editar}.")
-            conexao.close()
-            return
+        cursor.execute("""SELECT m.id, m.titulo, m.tipo, m.nivel, t.nome 
+                       FROM materiais m
+                       LEFT JOIN temas t ON m.id_tema = t.id
+                       ORDER BY m.id""")
+        resultados = cursor.fetchall()
+        _exibir_resultados(resultados)
+        while True:
+            id_editar = ler_entrada("\nDigite o ID do material que deseja editar: ", int)
+            if id_editar is None: return
+
+            # busca os dados atuais desse ID (JOIN LEFT -> traz todos os registros de materiais, 
+            # mesmo que não tenham correspondência em temas). Se um material não tiver tema associado, 
+            # ele ainda aparecerá no resultado, mas os campos da tabela temas virão como NULL
+
+            sql_busca = """
+            SELECT m.titulo, m.tipo, m.nivel, m.data, m.link, 
+                m.palavras_chave, m.id_tema, t.nome 
+            FROM materiais m
+            LEFT JOIN temas t ON m.id_tema = t.id
+            WHERE m.id = ?
+            """
+            cursor.execute(sql_busca, (id_editar,))
+            dados_atuais = cursor.fetchone()
+
+            if dados_atuais is None:
+                print(f"\n{erro()} Nenhum material encontrado com o ID {id_editar}.")
+            else:
+                break
         
         # dados atuais
         (titulo, tipo, nivel, data, link, palavras, id_tema_atual, nome_tema_atual) = dados_atuais

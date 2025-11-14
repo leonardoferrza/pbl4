@@ -152,7 +152,8 @@ def gerenciar_temas():
         
         try:
             acao = ler_entrada("\nEscolha uma opção: ", int)
-            if acao is None or acao == 0:
+            if acao is None: return
+            if acao == 0:
                 print("\nRetornando ao menu principal...")
                 break
             

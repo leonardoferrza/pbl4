@@ -18,7 +18,8 @@ def gerar_relatorios():
         try:
             acao = ler_entrada("\nEscolha uma opção de relatório: ", int)
             
-            if acao is None or acao == 0:
+            if acao is None: return
+            if acao == 0:
                 print("\nRetornando ao menu principal...")
                 break
 
