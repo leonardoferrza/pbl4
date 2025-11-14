@@ -68,13 +68,18 @@ def registrar_material():
                 print(f"\n{erro()} Formato de data inválido. Use DD/MM/AAAA (ex: 31/12/2025).")
 
 
+<<<<<<< HEAD
         # Link (obrigatório) 
         padrao_url = re.compile(r'^(https?://)'r'([a-zA-Z0-9-]+\.)+'r'([a-zA-Z]{2,})'r'(/[^\s]*)?$')
 
+=======
+        # Link
+>>>>>>> 29c29e3ee1ed443a306b9cac60ee9d9ce21cb0c6
         while True:
             link = ler_entrada("\nLink (pressione Enter se não houver): ", str)
             if link is None: return
             link = link.strip()
+<<<<<<< HEAD
             
             if link == "":
                 link = None
@@ -83,6 +88,14 @@ def registrar_material():
             if not padrao_url.match(link):
                 print(f"\n{erro()} Insira uma URL válida (começando com http:// ou https://).")
                 continue
+=======
+
+            if link:
+                padrao_url = re.compile(r'^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$')
+                if not padrao_url.match(link):
+                    print(f"\n{erro()} Insira uma URL válida (começando com http:// ou https://).")
+                    continue
+>>>>>>> 29c29e3ee1ed443a306b9cac60ee9d9ce21cb0c6
 
             # Verificação no banco
             cursor.execute("SELECT id FROM materiais WHERE link = ?", (link,))
